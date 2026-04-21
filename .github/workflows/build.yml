@@ -1,13 +1,17 @@
 name: Build APK
 on: [push, pull_request]
 
+# Aquí activamos lo que GitHub te pide para evitar el aviso de depreciación
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout del código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Esta ya es la versión más actual, la variable env la hará correr en Node 24
 
       - name: Instalar dependencias del sistema
         run: |
@@ -17,7 +21,6 @@ jobs:
 
       - name: Generar APK con Buildozer
         run: |
-          # Acepta licencias y compila en modo debug
           yes | buildozer android debug
         
       - name: Subir APK como artefacto
