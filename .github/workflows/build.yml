@@ -1,0 +1,28 @@
+name: Build APK
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip3 install --user --upgrade buildozer cython virtualenv
+
+      - name: Generar APK con Buildozer
+        run: |
+          # Acepta licencias y compila en modo debug
+          yes | buildozer android debug
+        
+      - name: Subir APK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiApp-APK-Resultado
+          path: bin/*.apk
+          retention-days: 5
