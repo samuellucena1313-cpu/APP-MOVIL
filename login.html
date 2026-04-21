@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Pantalla de Carga -->
+<div id="loading-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#E6D9C7] dark:bg-black transition-opacity duration-500 opacity-0 pointer-events-none">
+    <div class="text-center">
+        <img src="{{ url_for('static', filename='loading.gif') }}" alt="Cargando..." class="w-24 h-24 mx-auto mb-4">
+        <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Verificando...</p>
+    </div>
+</div>
+
+<div class="px-6 py-16 flex flex-col items-center justify-center min-h-screen bg-[#E6D9C7] dark:bg-black transition-colors duration-500">
+    <div class="w-full max-w-sm p-8 rounded-[3rem] glass shadow-2xl shadow-blue-500/30">
+        <div class="text-center mb-10">
+            <img src="/static/logo.png" alt="Logo Emaús" class="w-24 h-auto mx-auto mb-6 drop-shadow-2xl">
+            <h1 class="text-3xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 drop-shadow-lg">
+                ROSARIO DE EMAUS
+            </h1>
+            <p class="text-[0.6rem] font-bold uppercase tracking-[0.5em] text-slate-500 dark:text-slate-400 mt-1">CAMINO DE FE</p>
+            <div class="h-[2px] w-8 bg-gradient-to-r from-indigo-500 to-cyan-500 mx-auto mt-4 rounded-full opacity-40"></div>
+            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-[0.2em] mt-6">Iniciar Sesión</p>
+        </div>
+        <form id="login-form" method="POST" class="space-y-4">
+            {% if error %}
+            <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[0.7rem] font-bold text-center animate-pulse">
+                {{ error }}
+            </div>
+            {% endif %}
+            <div class="space-y-1">
+                <input type="password" name="password" placeholder="Contraseña" required 
+                    class="w-full p-4 bg-white/50 dark:bg-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm">
+            </div>
+            <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 active:scale-95 transition-all uppercase tracking-widest">ENTRAR</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('login-form').addEventListener('submit', function() {
+        const ls = document.getElementById('loading-screen');
+        ls.classList.remove('opacity-0', 'pointer-events-none');
+        ls.classList.add('opacity-100');
+    });
+</script>
+{% endblock %}

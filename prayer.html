@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    @keyframes celestialBloom {
+        0% { transform: scale(1.15); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.6); filter: brightness(1.1); }
+        50% { transform: scale(1.3); box-shadow: 0 0 45px rgba(255, 255, 0, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.9); filter: brightness(1.5); }
+        100% { transform: scale(1.15); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.6); filter: brightness(1.1); }
+    }
+
+    .bead-base {
+        position: absolute;
+        border-radius: 50%;
+        transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(10px);
+        z-index: 10;
+    }
+
+    /* Visibilidad mejorada para Modo Claro */
+    .theme-light .bead-base {
+        background: rgba(255, 255, 255, 0.65);
+        border: 1.2px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Visibilidad mejorada para Modo Oscuro */
+    .theme-dark .bead-base {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
+    }
+
+    .bead-am {
+        width: 10px;
+        height: 10px;
+    }
+
+    .bead-pn {
+        width: 18px;
+        height: 18px;
+    }
+
+    .bead-active { 
+        animation: celestialBloom 2s infinite ease-in-out;
+        background: radial-gradient(circle at 30% 30%, #ffffff 0%, #fff700 25%, #ffd700 55%, #b8860b 100%) !important;
+        border: 2px solid rgba(255, 255, 255, 1) !important;
+        z-index: 50 !important;
+    }
+
+    .bead-passed {
+        background: radial-gradient(circle at 35% 35%, #fff9c4 0%, #ffd700 50%, #daa520 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.6) !important;
+        box-shadow: 0 2px 12px rgba(218, 165, 32, 0.6), inset 0 0 5px rgba(255, 255, 255, 0.4) !important;
+        transform: scale(1) !important;
+        z-index: 20 !important;
+        opacity: 0.9;
+    }
+
+</style>
+
+<div class="theme-{{ config.theme }} relative px-6 py-8 flex flex-col h-full min-h-screen overflow-hidden bg-[#E6D9C7] dark:bg-black transition-colors duration-500">
+    <!-- Fondo de Jesús animado: Inicia visible al cargar la pantalla -->
+    <div id="bg-jesus" class="absolute inset-0 z-0 opacity-95 pointer-events-none bg-cover bg-center transition-all duration-[1000ms] scale-110" 
+         style="background-image: url('/static/Jesus.jpg');"></div>
+
+    <div class="relative z-10 flex flex-col h-full flex-grow justify-between">
+    <div class="flex items-center mb-8">
+        <a href="{{ url_for('index') }}" class="text-blue-500 font-bold text-sm flex items-center px-5 py-2.5 bg-white/10 dark:bg-white/5 backdrop-blur-md rounded-full transition-all duration-300 ease-out active:scale-95 active:bg-white/20">
+            <span class="mr-1 text-2xl">‹</span> Volver
+        </a>
+    </div>
+
+    <div class="flex-grow flex flex-col items-center justify-center min-h-0">
+        <div id="rosary-container" class="relative w-80 h-80 mb-4 transition-transform duration-[1500ms] ease-in-out"></div>
+
+        <div class="w-16 bg-gray-200 dark:bg-white/10 rounded-full h-[2px] mb-8">
+            <div id="progress-bar" class="bg-blue-500 h-1 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        
+        <div class="w-full flex flex-col items-center px-6 py-6 rounded-[2.5rem] glass relative h-64 shrink-0 shadow-2xl shadow-blue-500/25">
+            <p id="instruction" class="text-sm uppercase tracking-[0.4em] text-blue-500 font-black mb-5 opacity-70 text-center">Meditación</p>
+            <div id="prayer-container" class="w-full overflow-hidden flex-grow px-2">
+                <div id="prayer-content" class="min-h-full flex items-center justify-center text-center text-[1.05rem] font-medium leading-relaxed text-gray-800 dark:text-gray-100 transition-all duration-700">
+                    Cargando meditaciones...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-4 pb-8 mt-8">
+        <button id="btn-next" onclick="nextBead()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-black text-lg rounded-[2.5rem] shadow-2xl shadow-blue-500/30 transition-all duration-300 ease-out active:scale-95 active:brightness-90">
+            COMENZAR
+        </button>
+        <div class="grid grid-cols-2 gap-4">
+            <button id="btn-prev" onclick="prevBead()" class="py-5 bg-white/40 dark:bg-white/10 text-blue-600 dark:text-blue-400 font-black text-sm uppercase tracking-[0.2em] rounded-[2.5rem] border border-white/20 shadow-sm transition-all duration-300 ease-out active:scale-95 active:bg-white/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity">
+                ATRÁS
+            </button>
+            <button onclick="resetRosary()" class="py-5 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 font-black text-sm uppercase tracking-[0.2em] rounded-[2.5rem] border border-red-500/10 transition-all duration-300 ease-out active:scale-95 active:bg-red-500/20 backdrop-blur-md">
+                REINICIAR
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    let rosario = null;
+    let stage = "START"; 
+    let currentMysteryIdx = 0;
+    let currentAM = 0;
+    let introAMCount = 0;
+    let globalBeadIdx = -1;
+
+    const AVE_MARIA_TEXT = "Dios te salve, María, llena eres de gracia, el Señor es contigo. Bendita tú eres entre todas las mujeres y bendito es el fruto de tu vientre, Jesús. Santa María, Madre de Dios, ruega por nosotros, pecadores, ahora y en la hora de nuestra muerte. Amén.";
+    const PADRE_NUESTRO_TEXT = "Padre nuestro, que estás en el cielo, santificado sea tu Nombre; venga a nosotros tu reino; hágase tu voluntad en la tierra como en el cielo. Danos hoy nuestro pan de cada día; perdona nuestras ofensas, como también nosotros perdonamos a los que nos ofenden; no nos dejes caer en la tentación, y líbranos del mal. Amén.";
+
+    const container = document.getElementById('rosary-container');
+    const centerX = 160; // Centro exacto de w-80
+    const centerY = 160; // Centro exacto de h-80
+    const radius = 130;  // Radio del círculo perfecto
+    const beads = [];
+
+    // Generar exactamente 59 cuentas en un círculo perfecto siguiendo el patrón de Emaús
+    for (let i = 0; i < 59; i++) {
+        const bead = document.createElement('div');
+        const angle = (i * (360 / 59) - 90) * (Math.PI / 180);
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        // Patrón: 0 (Intro PN), 4, 15, 26, 37, 48 (PNs de los 5 Misterios) son grandes
+        const isBig = (i === 0 || (i >= 4 && (i - 4) % 11 === 0));
+        const sizeClass = isBig ? 'bead-pn' : 'bead-am';
+
+        bead.className = `bead-base shadow-lg ${sizeClass}`;
+        
+        const half = isBig ? 9 : 5;
+        bead.style.left = (x - half) + 'px';
+        bead.style.top = (y - half) + 'px';
+
+        container.appendChild(bead);
+        beads.push(bead);
+    }
+
+    fetch('/ocr')
+        .then(res => res.json())
+        .then(data => {
+            rosario = data;
+            document.getElementById('prayer-content').innerText = "Todo listo. Pulsa COMENZAR para iniciar la Oración Introductoria.";
+        });
+
+    function lightBead(idx) {
+        beads.forEach((bead, i) => {
+            bead.classList.remove('bead-active', 'bead-passed');
+            if (i < idx) bead.classList.add('bead-passed');
+            else if (i === idx) bead.classList.add('bead-active');
+        });
+        globalBeadIdx = idx;
+    }
+
+    function updateNavigationButtons() {
+        const btnPrev = document.getElementById('btn-prev');
+        if (stage === "START") {
+            btnPrev.classList.add('opacity-0', 'pointer-events-none');
+        } else {
+            btnPrev.classList.remove('opacity-0', 'pointer-events-none');
+        }
+    }
+
+    function nextBead() {
+        const btn = document.getElementById('btn-next');
+        if (!rosario) return;
+
+        if (stage === "START") {
+            stage = "INTRO";
+            // Aseguramos que la imagen pase al fondo si el usuario pulsa rápido
+            applyBackgroundState();
+            updateUI(rosario.introduccion.titulo, rosario.introduccion.texto);
+            btn.innerText = "SIGUIENTE";
+        } else if (stage === "INTRO") {
+            stage = "INTRO_PN";
+            lightBead(0); // Intro Padre Nuestro (Grande)
+            updateUI("PADRE NUESTRO", PADRE_NUESTRO_TEXT);
+        } else if (stage === "INTRO_PN") {
+            stage = "INTRO_AM";
+            introAMCount = 0;
+            lightBead(1); // Primera de las 3 Ave Marías iniciales (Pequeña)
+            updateUI("AVE MARÍA (Por la FE)", AVE_MARIA_TEXT);
+        } else if (stage === "INTRO_AM") {
+            introAMCount++;
+            if (introAMCount < 3) {
+                lightBead(1 + introAMCount);
+                const titles = ["Por la FE", "Por la ESPERANZA", "Por la CARIDAD"];
+                updateUI(`AVE MARÍA (${titles[introAMCount]})`, AVE_MARIA_TEXT);
+            } else {
+                stage = "OJM"; // Ir al ciclo de misterios
+                nextBead();
+            }
+        } else if (stage === "OJM") {
+            if (currentMysteryIdx < 5) {
+                stage = "M_READ";
+                updateUI(rosario.misterios[currentMysteryIdx].titulo, rosario.misterios[currentMysteryIdx].lectura, rosario.misterios[currentMysteryIdx].imagen);
+            } else {
+                lightBead(-1);
+                stage = "END";
+                updateUI(rosario.conclusion.titulo, rosario.conclusion.texto, rosario.conclusion.imagen);
+                btn.innerText = "TERMINAR";
+            }
+        } else if (stage === "M_READ") {
+            stage = "M_REFLECT";
+            updateUI("REFLEXIÓN", rosario.misterios[currentMysteryIdx].reflexion);
+        } else if (stage === "M_REFLECT") {
+            stage = "PN";
+            lightBead(4 + (currentMysteryIdx * 11)); // Padre Nuestro del Misterio (Grande)
+            updateUI("PADRE NUESTRO", PADRE_NUESTRO_TEXT);
+        } else if (stage === "PN") {
+            stage = "AM";
+            currentAM = -1; // Para que la primera AM sea 0 tras el ++
+            nextBead();
+        } else if (stage === "AM") {
+            if (currentAM < 9) {
+                currentAM++;
+                lightBead(5 + (currentMysteryIdx * 11) + currentAM); // Ave Marías del Misterio (Pequeñas)
+                updateUI(`AVE MARÍA ${currentAM + 1}/10`, AVE_MARIA_TEXT);
+            } else {
+                stage = "GLORIA";
+                updateUI("GLORIA", "Gloria al Padre, al Hijo y al Espíritu Santo...");
+            }
+        } else if (stage === "GLORIA") {
+            stage = "OJM";
+            currentMysteryIdx++;
+            updateUI("OH JESÚS MÍO", "Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno...");
+        } else if (stage === "END" || stage === "START") {
+            document.getElementById('rosary-container').style.transform = "scale(0.7) rotate(180deg)";
+            window.location.href = "{{ url_for('index') }}";
+        }
+
+        updateNavigationButtons();
+    }
+
+    function prevBead() {
+        const btnNext = document.getElementById('btn-next');
+        if (!rosario || stage === "START") return;
+
+        if (stage === "INTRO") {
+            stage = "START";
+            btnNext.innerText = "COMENZAR";
+            updateUI("Meditación", "Todo listo. Pulsa COMENZAR para iniciar la Oración Introductoria.");
+        } else if (stage === "INTRO_PN") {
+            stage = "INTRO";
+            lightBead(-1);
+            updateUI(rosario.introduccion.titulo, rosario.introduccion.texto);
+        } else if (stage === "INTRO_AM") {
+            if (introAMCount > 0) {
+                introAMCount--;
+                lightBead(1 + introAMCount);
+                const titles = ["Por la FE", "Por la ESPERANZA", "Por la CARIDAD"];
+                updateUI(`AVE MARÍA (${titles[introAMCount]})`, AVE_MARIA_TEXT);
+            } else {
+                stage = "INTRO_PN";
+                lightBead(0);
+                updateUI("PADRE NUESTRO", PADRE_NUESTRO_TEXT);
+            }
+        } else if (stage === "OJM") {
+            if (currentMysteryIdx > 0) {
+                currentMysteryIdx--;
+                stage = "GLORIA";
+                updateUI("GLORIA", "Gloria al Padre, al Hijo y al Espíritu Santo...");
+            } else {
+                stage = "INTRO_AM";
+                introAMCount = 2;
+                lightBead(3);
+                updateUI(`AVE MARÍA (Por la CARIDAD)`, AVE_MARIA_TEXT);
+            }
+        } else if (stage === "M_READ") {
+            if (currentMysteryIdx === 0) {
+                stage = "INTRO_AM";
+                introAMCount = 2;
+                lightBead(3);
+                updateUI(`AVE MARÍA (Por la CARIDAD)`, AVE_MARIA_TEXT);
+            } else {
+                stage = "OJM";
+                updateUI("OH JESÚS MÍO", "Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno...");
+            }
+        } else if (stage === "M_REFLECT") {
+            stage = "M_READ";
+            updateUI(rosario.misterios[currentMysteryIdx].titulo, rosario.misterios[currentMysteryIdx].lectura, rosario.misterios[currentMysteryIdx].imagen);
+        } else if (stage === "PN") {
+            stage = "M_REFLECT";
+            if (currentMysteryIdx === 0) lightBead(3);
+            else lightBead(4 + (currentMysteryIdx - 1) * 11 + 10);
+            updateUI("REFLEXIÓN", rosario.misterios[currentMysteryIdx].reflexion);
+        } else if (stage === "AM") {
+            if (currentAM > 0) {
+                currentAM--;
+                lightBead(5 + (currentMysteryIdx * 11) + currentAM);
+                updateUI(`AVE MARÍA ${currentAM + 1}/10`, AVE_MARIA_TEXT);
+            } else {
+                stage = "PN";
+                lightBead(4 + (currentMysteryIdx * 11));
+                updateUI("PADRE NUESTRO", PADRE_NUESTRO_TEXT);
+            }
+        } else if (stage === "GLORIA") {
+            stage = "AM";
+            currentAM = 9;
+            lightBead(5 + (currentMysteryIdx * 11) + currentAM);
+            updateUI(`AVE MARÍA 10/10`, AVE_MARIA_TEXT);
+        } else if (stage === "END") {
+            stage = "OJM";
+            currentMysteryIdx = 5;
+            updateUI("OH JESÚS MÍO", "Oh Jesús mío, perdona nuestros pecados, líbranos del fuego del infierno...");
+            btnNext.innerText = "SIGUIENTE";
+        }
+        
+        updateNavigationButtons();
+    }
+
+    function resetRosary() {
+        location.reload();
+    }
+
+    function adjustFontSize() {
+        const content = document.getElementById('prayer-content');
+        const container = document.getElementById('prayer-container');
+        
+        // Desactivamos temporalmente la transición para un cálculo instantáneo
+        content.style.transition = 'none';
+        
+        let size = 105; // Empezamos en 1.05rem (multiplicado por 100 para evitar floats en el loop)
+        content.style.fontSize = '1.05rem';
+
+        // Reducimos el tamaño hasta que el contenido quepa en el contenedor o lleguemos a un mínimo legible
+        while (content.scrollHeight > container.clientHeight && size > 65) {
+            size -= 3;
+            content.style.fontSize = (size / 100) + 'rem';
+        }
+        
+        // Restauramos la transición para que el fade-in de updateUI funcione
+        content.style.transition = '';
+    }
+
+    // Al cargar la pantalla, la imagen inicial se muestra clara y luego pasa al fondo
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            applyBackgroundState();
+        }, 1500); 
+    });
+
+    // Función para colocar la imagen en modo fondo (sutil pero visible)
+    function applyBackgroundState() {
+        const bg = document.getElementById('bg-jesus');
+        if (!bg) return;
+        const isDark = document.querySelector('.theme-dark');
+        bg.style.transition = "all 1000ms cubic-bezier(0.4, 0, 0.2, 1)";
+        bg.style.opacity = isDark ? "0.15" : "0.45";
+        bg.style.transform = "scale(1.05)";
+        bg.style.filter = isDark ? "none" : "saturate(1.4) contrast(1.15) brightness(0.85)";
+    }
+
+    function updateUI(instr, text, imgUrl = null) {
+        const content = document.getElementById('prayer-content');
+        document.getElementById('instruction').innerText = instr;
+
+        const bg = document.getElementById('bg-jesus');
+        if (bg && rosario) {
+            let targetImg = imgUrl;
+            if (!targetImg) {
+                if (stage.startsWith("INTRO") || (stage === "OJM" && currentMysteryIdx === 0)) {
+                    targetImg = rosario.introduccion.imagen;
+                } else if (stage === "END") {
+                    targetImg = rosario.conclusion.imagen;
+                } else {
+                    let mIdx = currentMysteryIdx;
+                    if (stage === "OJM") mIdx--; 
+                    const safeIdx = Math.max(0, Math.min(mIdx, 4));
+                    targetImg = rosario.misterios[safeIdx].imagen;
+                }
+            }
+
+            if (targetImg && (!bg.style.backgroundImage || !bg.style.backgroundImage.includes(targetImg))) {
+                bg.style.transition = "none";
+                bg.style.backgroundImage = `url('${targetImg}')`;
+                bg.style.opacity = "0.95"; 
+                bg.style.transform = "scale(1.15)";
+                bg.style.filter = "saturate(1.5) contrast(1.2)";
+                bg.offsetHeight; 
+                setTimeout(() => applyBackgroundState(), 1000);
+            }
+        }
+
+        const progress = stage === "AM" ? (currentAM / 10) * 100 : (currentMysteryIdx / 5) * 100;
+        document.getElementById('progress-bar').style.width = `${progress}%`;
+        
+        content.style.opacity = 0;
+        setTimeout(() => {
+            content.innerText = text;
+            adjustFontSize();
+            content.style.opacity = 1;
+        }, 200);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="px-6 py-8 flex flex-col h-full min-h-screen overflow-y-auto bg-[#E6D9C7] dark:bg-black transition-colors duration-500">
+    <div class="flex items-center mb-8">
+        <a href="{{ url_for('index') }}" class="text-blue-500 font-bold text-lg flex items-center px-4 py-2 bg-blue-500/10 rounded-full transition-all duration-300 ease-out active:scale-95 active:bg-blue-500/20">
+            <span class="mr-1 text-2xl">‹</span> Volver
+        </a>
+    </div>
+    
+    <div class="px-2 mb-10">
+        <h1 class="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 drop-shadow-xl leading-none">
+            GUÍA DE ORACIÓN
+        </h1>
+        <p class="text-[0.65rem] font-bold uppercase tracking-[0.5em] text-slate-500 dark:text-slate-400 mt-2">Rosario de Emaús</p>
+    </div>
+    
+    <div class="space-y-8 pb-12">
+        <!-- Tarjeta de Bienvenida -->
+        <div class="p-6 bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-[2.5rem] shadow-2xl shadow-blue-500/30">
+            <p class="text-xl font-bold leading-tight italic tracking-tight opacity-95">
+                "Este rosario nos invita a caminar junto a Jesús, reconociéndolo en su Palabra y en la Fracción del Pan."
+            </p>
+        </div>
+
+        <div class="space-y-8">
+            <div class="p-6 rounded-[2.2rem] glass">
+                <h3 class="text-blue-600 dark:text-blue-400 font-black uppercase tracking-[0.3em] text-[0.6rem] mb-2">Paso 1</h3>
+                <h4 class="text-2xl font-black tracking-tighter mb-3 text-slate-800 dark:text-slate-100">La Preparación</h4>
+                <p class="text-slate-600 dark:text-slate-400 text-[0.95rem] font-medium leading-relaxed">
+                    Inicia con la Señal de la Cruz y la <strong>Oración Introductoria</strong>. Es el momento de pedir al Espíritu Santo que abra tu corazón al misterio.
+                </p>
+            </div>
+
+            <div class="p-6 rounded-[2.2rem] glass">
+                <h3 class="text-blue-600 dark:text-blue-400 font-black uppercase tracking-[0.3em] text-[0.6rem] mb-2">Paso 2</h3>
+                <h4 class="text-2xl font-black tracking-tighter mb-3 text-slate-800 dark:text-slate-100">Estructura del Misterio</h4>
+                <p class="text-slate-600 dark:text-slate-400 text-[0.95rem] font-medium mb-5">Cada uno de los 5 misterios sigue este orden sagrado:</p>
+                <ul class="space-y-4 text-[0.9rem] font-bold text-slate-700 dark:text-slate-300">
+                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span> Lectura del Evangelio</li>
+                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span> Meditación y Reflexión</li>
+                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span> 1 Padre Nuestro</li>
+                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span> 10 Ave Marías (Denario)</li>
+                    <li class="flex items-center"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span> Gloria y Oh Jesús Mío</li>
+                </ul>
+            </div>
+
+            <div class="p-6 rounded-[2.2rem] glass">
+                <h3 class="text-blue-600 dark:text-blue-400 font-black uppercase tracking-[0.3em] text-[0.6rem] mb-2">Paso 3</h3>
+                <h4 class="text-2xl font-black tracking-tighter mb-3 text-slate-800 dark:text-slate-100">El Encuentro Final</h4>
+                <p class="text-slate-600 dark:text-slate-400 text-[0.95rem] font-medium leading-relaxed">
+                    Tras los cinco misterios, recitamos la <strong>Oración Conclusiva</strong>. Salimos al mundo con el corazón ardiente, listos para reconocer a Jesús en el prójimo.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

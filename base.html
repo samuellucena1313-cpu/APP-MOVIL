@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" class="{{ config.theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROSARIO DE EMAUS CAMINO DE FE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+        .glass { backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%); box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.25); }
+        .light .glass { background: rgba(255, 255, 255, 0.75); }
+        .dark .glass { background: rgba(28, 28, 30, 0.6); }
+    </style>
+</head>
+<body class="bg-[#E6D9C7] dark:bg-black text-black dark:text-white min-h-screen flex justify-center transition-colors duration-500">
+    <div class="relative w-full max-w-md bg-[#E6D9C7] dark:bg-black shadow-2xl overflow-hidden flex flex-col min-h-screen">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
