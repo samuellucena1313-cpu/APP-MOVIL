@@ -1,27 +1,27 @@
 name: Build APK
 on: [push, pull_request]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Actualizamos a v4.1.7+ o la más reciente disponible que ya apunta a Node 24
       - name: Checkout del código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Instalar dependencias del sistema
         run: |
           sudo apt update
-          # Nota: Cambiamos libtinfo5 por libtinfo6 para compatibilidad con Ubuntu 24.04
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
           pip3 install --user --upgrade buildozer cython virtualenv
 
       - name: Generar APK con Buildozer
         run: |
-          # Aceptamos licencias de Android y compilamos
+          # Importante: Aseguramos que el PATH de pip esté disponible
+          export PATH=$PATH:$HOME/.local/bin
           yes | buildozer android debug
         
       - name: Subir APK como artefacto
